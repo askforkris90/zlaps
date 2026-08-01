@@ -1,319 +1,152 @@
-# ZLAPS - Phone Communication System for Metropolitan Urban Communities
+# ZLAPS — Frequency-Based Phone Communication
 
-[![Repository](https://img.shields.io/badge/repo-askforkris90%2Fzlaps-blue)](https://github.com/askforkris90/zlaps)
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.7%2B-blue)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE) [![Python 3.7+](https://img.shields.io/badge/python-3.7%2B-blue)](#) [![CI](https://img.shields.io/badge/ci-pending-lightgrey)](#)
 
-Affordable phone communication system combining frequency-based dialing with text messaging. Designed for metropolitan urban communities with wireless download support for mobile devices.
+ZLAPS is a lightweight Python library that demonstrates frequency-based dialing combined with a simple text-messaging layer. It is designed for experimentation and low-bandwidth scenarios (community, educational, and embedded device use). This repo contains the core signal generation, messaging handlers, and helpers to prepare a small wireless/embedded distribution.
 
-## 🎯 Features
+Status: alpha — experimental, educational use only.
 
-- **Frequency-Based Dialing** - Uses audio frequencies (20-250 Hz) instead of traditional signals
-- **Text Messaging** - Full messaging with conversation history tracking
-- **Low-Sound Mode** - Optimized for low-frequency communication patterns
-- **Hybrid Communication** - Combine frequency dialing and text simultaneously
-- **Back-and-Forth Conversations** - Simulate multi-turn communication exchanges
-- **Wireless Download** - Download to mobile/wireless devices
-- **Mobile Optimization** - Android, Linux, custom device support
-- **Minimal Footprint** - ~19 KB total size for wireless distribution
-- **No iOS Dependencies** - Completely independent, no Apple platform requirements
+Table of Contents
+- Features
+- Quick highlights
+- Prerequisites
+- Installation
+- Quick start
+- Examples
+- Module overview
+- Technical specs & limitations
+- Wireless distribution & verification
+- Troubleshooting
+- Contributing & Code of Conduct
+- License & Support
 
-## 📦 Installation
+Features
+- Frequency-based dialing (tone generation in the 20–250 Hz range)
+- Text messaging with conversation history
+- Low-sound mode (narrower frequency range for limited hardware)
+- Hybrid communication (tones + text)
+- Utilities for packaging and distributing to mobile/embedded devices
 
-### Prerequisites
-- Python 3.7 or higher
-- pip package manager
-- NumPy library
+Quick highlights
+- Minimal, educational implementation intended for demonstrations and research.
+- Designed to be portable to Linux-based devices (including Raspberry Pi) and Termux on Android.
+- Includes examples showing dialing, message exchange, and hybrid use.
 
-### Quick Install
+Prerequisites
+- Python 3.7 or newer
+- pip (or pip3)
+- NumPy (signal generation uses NumPy arrays)
+- An audio output device for playback or a WAV writer for file export
 
+Installation
+
+From source (recommended for development)
 ```bash
-# Clone repository
 git clone https://github.com/askforkris90/zlaps.git
 cd zlaps
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Verify installation
-python examples.py
+python3 -m pip install -r requirements.txt
+# optionally install in editable mode for development
+python3 -m pip install -e .
 ```
 
-### Wireless Download for Mobile Devices
-
-**Android (via Termux):**
+Run examples
 ```bash
-pkg install python3 python3-pip
+# From project root
+python3 examples.py
+```
+
+Android (Termux)
+```bash
+pkg update && pkg install python
 pip install numpy
 git clone https://github.com/askforkris90/zlaps.git
 cd zlaps
 python3 communication_core.py
 ```
 
-**Linux/Raspberry Pi:**
-```bash
-python3 -m pip install -r requirements.txt
-python3 communication_core.py
-```
+Notes
+- If you publish a package to PyPI, replace the source install steps with `pip install zlaps`.
+- If a binary audio output is not available on your device, use the included save/export helpers to write WAV files.
 
-See [INSTALL.md](INSTALL.md) for detailed setup instructions.
-
-## 🚀 Quick Start
-
+Quick start (minimal, runnable example)
 ```python
 from communication_core import CommunicationCore
 
-# Create communication endpoint
-comm = CommunicationCore(user_id="yourname", low_sound_mode=True)
+# Create a communication endpoint (no network required for local examples)
+comm = CommunicationCore(user_id="demo", low_sound_mode=True)
 
-# Dial out using frequency signals
-comm.dial_out(recipient="loretta", number_sequence="555-1234")
+# Dial: returns metadata about the generated signal (no playback required)
+result = comm.dial_out(recipient="loretta", number_sequence="555-1234")
+print(result)  # e.g. {'status': 'ok', 'signal_length': 44100, ...}
 
-# Send text message
-comm.send_text(recipient="loretta", message_content="Hey, can you hear me?")
-
-# Receive message
-comm.receive_text(sender="loretta", message_content="Yes, loud and clear!")
-
-# View conversation
+# Send/receive text
+comm.send_text(recipient="loretta", message_content="Hello Loretta!")
+comm.receive_text(sender="loretta", message_content="Hi there!")
 print(comm.get_conversation_history("loretta"))
 ```
 
-## 📚 Usage Examples
+Examples
+- See examples.py for end-to-end demos:
+  - Basic frequency dialing
+  - Send & receive text
+  - Hybrid communication
+  - Back-and-forth exchanges
 
-### Example 1: Basic Frequency Dialing
+Module overview
+- frequency_dialer.py — Frequency generation and tone sequencing
+  - FrequencyConfig: settings for generation
+  - FrequencyDialer: creates tones, sequences, and exports audio
+- text_handler.py — Message model and conversation tracker
+  - Message: single message object
+  - TextHandler: send/receive and history management
+- communication_core.py — Orchestrator combining dialing and messaging
+  - CommunicationCore: primary interface used in examples
+- wireless_download.py — Utilities for packaging for wireless/mobile devices
+  - WirelessDownloadManager, WirelessPackage, MobileOptimizer
 
-```python
-from communication_core import CommunicationCore
+Technical specs & limitations
+- Default sample rate: 44,100 Hz
+- Frequency range (configurable): 20–250 Hz
+- Low-sound mode: 20–120 Hz (device/hardware dependent)
+- Tone duration (default): 1.0 second per digit (configurable)
+- Audio format: WAV (mono, 16-bit) for exports
+- Note on hardware: Many mobile phone speakers and small embedded speakers cannot reproduce frequencies below ~50 Hz robustly — audible result will be device-dependent.
+- Size claim: the repository aims for a small footprint; do not rely on a hard-coded "~19 KB" size without measuring the actual distribution (wheel, zip, or minified script). Update this number after building the actual package.
 
-comm = CommunicationCore(user_id="user1", low_sound_mode=True)
-
-# Dial out
-result = comm.dial_out(recipient="loretta", number_sequence="555-1234")
-print(f"Status: {result['status']}")
-print(f"Signal length: {result['signal_length']} samples")
+Wireless distribution & verification
+- Create a package (zip/wheel) and publish or host in a release.
+- Provide SHA-256 checksums for each release artifact and include verification instructions.
+- Example verification:
+```bash
+# compute and verify checksum
+sha256sum zlaps-<version>.zip
 ```
 
-### Example 2: Send & Receive Text
+Troubleshooting
+- NumPy import error: `pip install numpy`
+- Audio playback failure: ensure your OS has an audio output device or use save_audio() to write a WAV file and play it externally
+- Termux permissions: Termux may require additional setup for audio; consider using WAV export if direct playback is unsupported
+- Checksum mismatch: re-download the artifact and re-run checksum verification
 
-```python
-# Send text
-comm.send_text(recipient="loretta", message_content="Hello Loretta!")
+Security & integrity
+- Sign or provide checksums for releases
+- Prefer secure channels for distributing sensitive builds; include version tracking in the package metadata
 
-# Receive text
-comm.receive_text(sender="loretta", message_content="Hi there!")
-```
-
-### Example 3: Hybrid Communication
-
-```python
-# Send frequency dial + text simultaneously
-comm.send_hybrid(
-    recipient="loretta",
-    number="555-5678",
-    text="Calling with backup text"
-)
-```
-
-### Example 4: Back-and-Forth Conversation
-
-```python
-exchange = comm.back_and_forth(
-    recipient="loretta",
-    exchange_pairs=[
-        (True, "Are you there?"),
-        (False, "Yes, I'm here!"),
-        (True, "Great, let's talk"),
-        (False, "Perfect!")
-    ]
-)
-print(exchange['history'])
-```
-
-### Example 5: Wireless Download for Mobile
-
-```python
-from wireless_download import WirelessDownloadManager
-
-manager = WirelessDownloadManager()
-info = manager.get_download_link(device_type="mobile")
-
-print(f"Download URL: {info['download_url']}")
-print(f"File Size: {info['file_size']}")
-print(f"Compatible Devices: {info['device_types']}")
-```
-
-## 📖 Module Documentation
-
-### frequency_dialer.py
-Generates audio frequency signals for phone dialing.
-
-**Key Classes:**
-- `FrequencyConfig` - Configuration for frequency generation
-- `FrequencyDialer` - Main frequency signal generator
-
-**Key Methods:**
-- `generate_tone(frequency)` - Create single tone
-- `dial_sequence(frequencies)` - Create sequence
-- `dial_out(number_sequence)` - Convert number to frequencies
-- `save_audio(signal, filename)` - Export to WAV
-
-### text_handler.py
-Manages text messaging and conversation tracking.
-
-**Key Classes:**
-- `Message` - Individual message representation
-- `TextHandler` - Messaging system manager
-
-**Key Methods:**
-- `create_message()` - Send message
-- `receive_message()` - Record inbound
-- `get_conversation()` - Retrieve history
-- `format_conversation()` - Display conversation
-
-### communication_core.py
-Main orchestration combining frequency dialing and text messaging.
-
-**Key Class:**
-- `CommunicationCore` - Main communication coordinator
-
-**Key Methods:**
-- `dial_out()` - Frequency dial
-- `send_text()` - Send message
-- `send_hybrid()` - Both simultaneously
-- `receive_text()` - Get message
-- `back_and_forth()` - Multi-turn conversation
-- `get_conversation_history()` - View history
-
-### wireless_download.py
-Package and distribute to wireless/mobile devices.
-
-**Key Classes:**
-- `WirelessPackage` - Downloadable package container
-- `WirelessDownloadManager` - Distribution manager
-- `MobileOptimizer` - Transmission optimization
-
-**Key Methods:**
-- `create_wireless_package()` - Build package
-- `get_download_link()` - Get download info
-- `verify_download()` - Check integrity
-- `log_download()` - Track downloads
-
-## 🔧 Technical Specifications
-
-| Spec | Value |
-|------|-------|
-| Sample Rate | 44,100 Hz |
-| Frequency Range | 20-250 Hz |
-| Low-Sound Mode | 20-120 Hz |
-| Tone Duration | 1.0 second per digit |
-| Amplitude | 0.7 (normalized) |
-| Audio Format | WAV (mono, 16-bit) |
-| Total Package Size | ~19 KB |
-| Python Version | 3.7+ |
-| Dependencies | NumPy |
-
-## 📱 Wireless Distribution
-
-ZLAPS supports wireless download to:
-- **Android** (Termux, Python IDE, custom apps)
-- **Linux** (Desktop, Raspberry Pi, BeagleBone)
-- **Custom Wireless Devices** (Any with Python 3.7+)
-- **IoT Devices** (Edge computing platforms)
-
-### Download Process
-
-1. Get package: `https://github.com/askforkris90/zlaps/releases`
-2. Verify checksum for integrity
-3. Extract modules
-4. Install NumPy dependency
-5. Initialize CommunicationCore
-
-### File Sizes (Wireless Optimized)
-- frequency_dialer.py: ~5 KB
-- text_handler.py: ~3 KB
-- communication_core.py: ~5 KB
-- wireless_download.py: ~6 KB
-- **Total: ~19 KB**
-
-## 🔒 Security & Integrity
-
-Each wireless package includes:
-- SHA-256 checksum for integrity verification
-- Device compatibility checking
-- Version tracking
-- Download logging
-
-```python
-# Verify downloaded package
-manager = WirelessDownloadManager()
-is_valid = manager.verify_download(package_id, checksum)
-```
-
-## 🎨 Use Cases
-
-- **Metropolitan Urban Communication** - Affordable phone connectivity
-- **Low-Bandwidth Networks** - Minimal data footprint
-- **Emergency Communication** - Backup messaging system
-- **Community Networks** - Local frequency-based communication
-- **IoT Communication** - Device-to-device messaging
-- **Educational** - Learning frequency modulation and networking
-
-## 📝 Configuration
-
-### Low-Sound Mode
-```python
-# Enable for "low sound friends" - uses 20-120 Hz range
-comm = CommunicationCore(user_id="me", low_sound_mode=True)
-```
-
-### Custom Frequency Range
-```python
-from frequency_dialer import FrequencyConfig, FrequencyDialer
-
-config = FrequencyConfig()
-config.low_freq_range = (50, 150)  # Custom range
-dialer = FrequencyDialer(config)
-```
-
-## 🐛 Troubleshooting
-
-| Issue | Solution |
-|-------|----------|
-| NumPy not found | `pip install numpy` |
-| Can't import modules | Ensure all .py files in same directory |
-| Audio not playing | Use `save_audio()` to export WAV |
-| Wireless download slow | Use minified version (50-70% smaller) |
-| Checksum mismatch | Re-download and verify integrity |
-
-## 📋 Requirements
-
-See `requirements.txt`:
-```
-numpy>=1.19.0
-```
-
-## 📄 License
-
-MIT License - See LICENSE file for details
-
-## 🤝 Contributing
-
-Contributions welcome! Please:
+Contributing
+Contributions welcome. Suggested workflow:
 1. Fork the repository
-2. Create feature branch
-3. Submit pull request
+2. Create a feature branch (git checkout -b feat/your-feature)
+3. Add tests and update docs
+4. Open a pull request describing your changes
 
-## 📞 Support
+Please add a CONTRIBUTING.md and CODE_OF_CONDUCT.md if you accept community contributions.
 
-- **Repository**: https://github.com/askforkris90/zlaps
-- **Issues**: https://github.com/askforkris90/zlaps/issues
-- **Documentation**: See INSTALL.md and README.md
+License
+MIT — see LICENSE for full text.
 
-## 🌍 Community
+Support & contact
+- Repo: https://github.com/askforkris90/zlaps
+- Issues: https://github.com/askforkris90/zlaps/issues
 
-Designed for metropolitan urban communities. ZLAPS provides affordable, low-bandwidth communication for communities worldwide.
-
----
-
-**No iOS Dependencies** | **Mobile Optimized** | **Urban Focused** | **Open Source**
+Acknowledgements
+- Designed for educational and experimental use in community and low-bandwidth scenarios.
