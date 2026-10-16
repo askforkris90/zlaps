@@ -2,7 +2,14 @@
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE) [![Python 3.7+](https://img.shields.io/badge/python-3.7%2B-blue)](#) [![CI](https://img.shields.io/badge/ci-pending-lightgrey)](#)
 
-ZLAPS is a lightweight Python library that demonstrates frequency-based dialing combined with a simple text-messaging layer. It is designed for experimentation and low-bandwidth scenarios (community, educational, and embedded device use). This repo contains the core signal generation, messaging handlers, and helpers to prepare a small wireless/embedded distribution.
+## Icons
+
+[![icon-256](https://raw.githubusercontent.com/askforkris90/zlaps/main/assets/icon/icon-256.png =200x200)](https://raw.githubusercontent.com/askforkris90/zlaps/main/assets/icon/icon-256.png)  
+[![icon-512](https://raw.githubusercontent.com/askforkris90/zlaps/main/assets/icon/icon-512.png =200x200)](https://raw.githubusercontent.com/askforkris90/zlaps/main/assets/icon/icon-512.png)  
+[![icon-1024](https://raw.githubusercontent.com/askforkris90/zlaps/main/assets/icon/icon-1024.png =200x200)](https://raw.githubusercontent.com/askforkris90/zlaps/main/assets/icon/icon-1024.png)  
+[![icon.svg](https://raw.githubusercontent.com/askforkris90/zlaps/main/assets/icon/icon.svg =200x200)](https://raw.githubusercontent.com/askforkris90/zlaps/main/assets/icon/icon.svg)
+
+ZLAPS is a lightweight Python library that demonstrates frequency-based dialing combined with a simple text-messaging layer. It is designed for experimentation and low-bandwidth scenarios (communicating over audio tones rather than a traditional network stack), and is intended to be easy to inspect, modify, and adapt for research or educational purposes.
 
 Status: alpha — experimental, educational use only.
 
@@ -111,7 +118,7 @@ Technical specs & limitations
 - Tone duration (default): 1.0 second per digit (configurable)
 - Audio format: WAV (mono, 16-bit) for exports
 - Note on hardware: Many mobile phone speakers and small embedded speakers cannot reproduce frequencies below ~50 Hz robustly — audible result will be device-dependent.
-- Size claim: the repository aims for a small footprint; do not rely on a hard-coded "~19 KB" size without measuring the actual distribution (wheel, zip, or minified script). Update this number after building the actual package.
+- Size claim: the repository aims for a small footprint; do not rely on a hard-coded "~19 KB" size without measuring the actual distribution (wheel, zip, or minified script). Update this number as the project evolves.
 
 Wireless distribution & verification
 - Create a package (zip/wheel) and publish or host in a release.
